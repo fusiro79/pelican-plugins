@@ -1,0 +1,74 @@
+Plugin: random_quote
+Description: insert a random quote in each Article and Page. The records are stored in an SQLite file.
+
+1) Create an **SQLite DB**
+
+    CREATE TABLE `Author` (
+      `id`  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name`    TEXT UNIQUE,
+      `presentation`    TEXT,
+      `web` TEXT UNIQUE,
+      `email`   TEXT
+    );
+
+    CREATE TABLE `Quote` (
+      `id`  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `lang`    TEXT NOT NULL DEFAULT 'IT',
+      `source`  TEXT,
+      `content` BLOB NOT NULL UNIQUE,
+      `author`  INTEGER NOT NULL,
+      FOREIGN KEY(`author`) REFERENCES `Author`(`id`) ON DELETE SET NULL
+    );
+
+2) Update your **HTML templates**
+
+    [base.html]
+    {% block random_quote %}
+      <h2>Citazione: <a href="{{ RANDOM_QUOTE['default_quote']['web'] }}">{{ RANDOM_QUOTE['default_quote']['author'] }}</a></h2>
+      <p><em>{{ RANDOM_QUOTE['default_quote']['content'] }}</em></p>
+    {% endblock %}
+
+    [article.html]
+    {% block random_quote %}
+      <h2>Citazione: <a href="{{ article.quote['web'] }}">{{ article.quote['author'] }}</a></h2>
+      <p><em>{{ article.quote['content'] }}</em></p>
+    {% endblock %}
+
+    [page.html]
+    {% block random_quote %}
+      <h2>Citazione: <a href="{{ page.quote['web'] }}">{{ page.quote['author'] }}</a></h2>
+      <p><em>{{ page.quote['content'] }}</em></p>
+    {% endblock %}
+
+2) Optionally, you may add settings to **pelicanconf.py**, for instance:
+
+    I18N_SUBSITES = {
+      'en': {
+          'RANDOM_QUOTE': {
+              'sqlite_db_file': 'db\\quotes.sqlite',
+              'default_quote' : {
+                  'author' : 'Ted Nelson',
+                  'web' : 'https://en.wikipedia.org/wiki/Ted_Nelson',
+                  'content' : "The World Wide Web was precisely what we were trying to PREVENT — ever-breaking links, links going outward only, quotes you can't follow to their origins, no version management, no rights management."},
+              }
+      },
+    }
+    RANDOM_QUOTE = {
+        'sqlite_db_file': 'db\\quotes.sqlite',
+        'default_quote' : {
+            'author' : 'Tim Berners-Lee',
+            'web' : 'https://en.wikipedia.org/wiki/Tim_Berners-Lee',
+            'content' : "Il Web è più un'innovazione sociale che un'innovazione " \
+                "tecnica. L'ho progettato perché avesse una ricaduta sociale, " \
+                "perché aiutasse le persone a collaborare, e non come un " \
+                "giocattolo tecnologico. Il fine ultimo del Web è migliorare la " \
+                "nostra esistenza reticolare nel mondo. Di solito noi ci " \
+                "agglutiniamo in famiglie, associazioni e aziende. Ci fidiamo a " \
+                "distanza e sospettiamo appena voltato l'angolo."
+        },
+    }
+
+The **italian users**, may refer to my article: https://www.ipertesti.com/blog/web-development/develop-pelican-plugin.html
+
+Regards,
+Roberto Fusi
